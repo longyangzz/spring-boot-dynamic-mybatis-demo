@@ -49,28 +49,38 @@ public class DynamicApplication implements CommandLineRunner {
 		 * 根据slave数据源获取目标数据库信息
 		 */
 		DataSourceContextHolder.setDBType("slave");
-		int primayrId = 1;
-		DBInfo dbInfo = dbService.getDBInfoByprimayrId(primayrId);
-		System.out.println("dbName is -> " + dbInfo.getDbName() + "; dbIP is  -> " + dbInfo.getDbIp() + "; dbUser is  -> " + dbInfo.getDbUser() + "; dbPasswd is -> " + dbInfo.getDbPasswd());
+		List<DBInfo > dbInfos = dbService.getDBInfos();
 
-		DruidDataSource dynamicDataSource = new DruidDataSource();
-		dynamicDataSource.setDriverClassName("com.mysql.jdbc.Driver");
-		dynamicDataSource.setUrl("jdbc:mysql://" + dbInfo.getDbIp() + ":" + dbInfo.getDbPort() + "/" + dbInfo.getDbName() + "?characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull");
-		dynamicDataSource.setUsername(dbInfo.getDbUser());
-		dynamicDataSource.setPassword(dbInfo.getDbPasswd());
+		for(int i = 0; i < dbInfos.size(); ++i){
+			DBInfo dbInfo = (DBInfo)dbInfos.get(i);
+			System.out.println("dbName is -> " + dbInfo.getDbName() + "; dbIP is  -> " + dbInfo.getDbIp() + "; dbUser is  -> " + dbInfo.getDbUser() + "; dbPasswd is -> " + dbInfo.getDbPasswd());
 
-		/**
-		 * 创建动态数据源
-		 */
-		Map<Object, Object> dataSourceMap = DynamicDataSource.getInstance().getDataSourceMap();
-		dataSourceMap.put(dbInfo.getDbName(), dynamicDataSource);
-		DynamicDataSource.getInstance().setTargetDataSources(dataSourceMap);
-		/**
-		 * 切换为动态数据源实例，打印学生信息
-		 */
-		DataSourceContextHolder.setDBType(dbInfo.getDbName());
-		List<StudentInfo> studentInfoList = studentService.getStudentInfo();
-		studentInfoList.stream().forEach(studentInfo -> System.out.println("studentName is : " + studentInfo.getStudentName() + "; className is : " + studentInfo.getClassName() + "; gradeName is : " + studentInfo.getGradeName()));
+			DruidDataSource dynamicDataSource = new DruidDataSource();
 
+			String driverName = dbInfo.getDbDriver();
+			dynamicDataSource.setDriverClassName(driverName);
+
+			if(driverName.equals("com.mysql.jdbc.Driver")){
+				dynamicDataSource.setUrl("jdbc:mysql://" + dbInfo.getDbIp() + ":" + dbInfo.getDbPort() + "/" + dbInfo.getDbName() + "?characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull");
+			}else if(driverName.equals("com.microsoft.sqlserver.jdbc.SQLServerDriver")){
+				dynamicDataSource.setUrl("jdbc:sqlserver://" + dbInfo.getDbIp() + ":" + dbInfo.getDbPort() + ";DatabaseName=" + dbInfo.getDbName() + ";integratedSecurity=false");
+			}
+
+			dynamicDataSource.setUsername(dbInfo.getDbUser());
+			dynamicDataSource.setPassword(dbInfo.getDbPasswd());
+
+			/**
+			 * 创建动态数据源
+			 */
+			Map<Object, Object> dataSourceMap = DynamicDataSource.getInstance().getDataSourceMap();
+			dataSourceMap.put(dbInfo.getDbDatasourceName(), dynamicDataSource);
+			DynamicDataSource.getInstance().setTargetDataSources(dataSourceMap);
+			/**
+			 * 切换为动态数据源实例，打印学生信息
+			 */
+			DataSourceContextHolder.setDBType(dbInfo.getDbName());
+			List<StudentInfo> studentInfoList = studentService.getStudentInfo();
+			studentInfoList.stream().forEach(studentInfo -> System.out.println("studentName is : " + studentInfo.getStudentName() + "; className is : " + studentInfo.getClassName() + "; gradeName is : " + studentInfo.getGradeName()));
+		}
 	}
 }

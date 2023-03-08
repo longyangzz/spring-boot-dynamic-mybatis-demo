@@ -1,7 +1,7 @@
 package com.yhyr.mybatis.dynamic.domain;
 
 /**
- * Created by YHYR on 2017-12-25
+ * Created by wly on 2023-03-08
  */
 
 public class DBInfo {
@@ -11,6 +11,24 @@ public class DBInfo {
     private int dbPort;
     private String dbUser;
     private String dbPasswd;
+    private String dbDatasourceName;
+    private String dbDriver;
+
+    public String getDbDriver() {
+        return dbDriver;
+    }
+
+    public void setDbDriver(String dbDriver) {
+        this.dbDriver = dbDriver;
+    }
+
+    public String getDbDatasourceName() {
+        return dbDatasourceName;
+    }
+
+    public void setDbDatasourceName(String dbDatasourceName) {
+        this.dbDatasourceName = dbDatasourceName;
+    }
 
     public int getId() {
         return id;

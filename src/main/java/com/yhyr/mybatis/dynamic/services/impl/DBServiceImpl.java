@@ -6,6 +6,8 @@ import com.yhyr.mybatis.dynamic.services.DBService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * Created by YHYR on 2017-12-25
  */
@@ -18,5 +20,10 @@ public class DBServiceImpl implements DBService {
     @Override
     public DBInfo getDBInfoByprimayrId(int primayrId) {
         return dbInfoMapper.getDBInfoById(primayrId);
+    }
+
+    @Override
+    public List< DBInfo> getDBInfos() {
+        return dbInfoMapper.getDBInfos();
     }
 }
